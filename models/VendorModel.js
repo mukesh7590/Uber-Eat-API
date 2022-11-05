@@ -17,7 +17,7 @@ const VendorSchema = new mongoose.Schema(
       foods: [
          {
             type: mongoose.SchemaTypes.ObjectId,
-            ref: "food",
+            ref: "Food",
          },
       ],
       lat: { type: Number },
