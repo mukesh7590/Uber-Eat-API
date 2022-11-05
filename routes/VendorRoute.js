@@ -11,7 +11,7 @@ const {
    UpdateVendorCoverImage,
 } = require("../controllers/VendorController");
 
-const { upload } = require("../utility/AWS");
+const { upload } = require("../AWS");
 
 router.post("/login", VendorLogin);
 
@@ -23,7 +23,7 @@ router.patch("/profile", UpdateVendorProfile);
 // router.post("/food", upload.single("image"), AddFood);
 // router.get("/foods", GetFoods);
 
-router.patch("/coverimage", upload.single('image'),UpdateVendorCoverImage);
+router.patch("/coverimage", upload.single("image"), UpdateVendorCoverImage);
 // router.patch("/service", UpdateVendorService);
 
 module.exports = router;
