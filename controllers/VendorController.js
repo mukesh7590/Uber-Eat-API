@@ -6,6 +6,7 @@ const {
 const asyncHandler = require("express-async-handler");
 
 const { FindVendor } = require("./AdminController");
+const Food = require("../models/FoodModel");
 
 // ================================== Vendor Profile Operations ==================================
 
@@ -70,9 +71,7 @@ const AddFood = async (req, res) => {
    if (user) {
       const { name, description, category, foodType, readyTime, price } =
          req.body;
-
       const vendor = await FindVendor(user._id);
-
       if (vendor !== null) {
          const createdFood = await Food.create({
             vendorId: vendor._id,
@@ -80,15 +79,13 @@ const AddFood = async (req, res) => {
             description: description,
             category: category,
             foodType: foodType,
-            images: "images",
+            images: [req.file.location],
             readyTime: readyTime,
             price: price,
             rating: 0,
          });
-
          vendor.foods.push(createdFood);
          const result = await vendor.save();
-
          return res.json(result);
       }
    }
@@ -129,10 +126,8 @@ const UpdateVendorCoverImage = async (req, res) => {
 const UpdateVendorService = async (req, res) => {
    const user = req.user;
    const { lat, lng } = req.body;
-
    if (user) {
       const existingVendor = await FindVendor(user._id);
-
       if (existingVendor !== null) {
          existingVendor.serviceAvailable = !existingVendor.serviceAvailable;
          if (lat && lng) {
@@ -142,7 +137,6 @@ const UpdateVendorService = async (req, res) => {
          const saveResult = await existingVendor.save();
          return res.json(saveResult);
       }
-
       return res.json(existingVendor);
    }
    return res.json({ message: "Vendor information is not found" });

@@ -1,4 +1,4 @@
-const Vendor = require("../models/vendor");
+const Vendor = require("../models/VendorModel");
 const asyncHandler = require("express-async-handler");
 const {
    GeneratePassword,

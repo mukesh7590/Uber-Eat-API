@@ -19,11 +19,10 @@ router.use(verifyToken);
 
 router.get("/profile", GetVendorProfile);
 router.patch("/profile", UpdateVendorProfile);
-
-// router.post("/food", upload.single("image"), AddFood);
-// router.get("/foods", GetFoods);
+router.post("/food", upload.single("image"), AddFood);
+router.get("/foods", GetFoods);
 
 router.patch("/coverimage", upload.single("image"), UpdateVendorCoverImage);
-// router.patch("/service", UpdateVendorService);
+router.patch("/service", UpdateVendorService);
 
 module.exports = router;
