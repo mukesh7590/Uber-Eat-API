@@ -2,12 +2,17 @@ const aws = require("aws-sdk");
 const multer = require("multer");
 const multerS3 = require("multer-s3");
 
+const ACCESS_SECRET = "AKIAYDZMZPUNTTUY7KPB";
+const ACCESS_KEY = "Yc95xMNWSj+2JKfnc+R7ZD4DtQ59RMvYCtH3wQGz";
+const REGION = "ap-south-1";
+const BUCKET = "uber-eat-api-images-bucket";
+
 aws.config.update({
-   secretAccessKey: process.env.ACCESS_SECRET,
-   accessKeyId: process.env.ACCESS_KEY,
-   region: process.env.REGION,
+   secretAccessKey: ACCESS_KEY,
+   accessKeyId: ACCESS_SECRET,
+   region: REGION,
 });
-const BUCKET = process.env.BUCKET;
+
 const s3 = new aws.S3();
 
 const upload = multer({
@@ -15,9 +20,9 @@ const upload = multer({
       s3: s3,
       acl: "public-read",
       bucket: BUCKET,
-      key: function (req, file, cb) {
-         console.log(file);
-         cb(null, file.originalname);
+      key: function (req, image, cb) {
+         console.log(image);
+         cb(null, image.originalname);
       },
    }),
 });

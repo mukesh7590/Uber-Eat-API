@@ -5,7 +5,6 @@ const {
 } = require("../utility/PasswordUtility");
 const asyncHandler = require("express-async-handler");
 
-
 const { FindVendor } = require("./AdminController");
 
 // ================================== Vendor Profile Operations ==================================
@@ -111,13 +110,13 @@ const GetFoods = async (req, res) => {
 const UpdateVendorCoverImage = async (req, res) => {
    const user = req.user;
 
-   console.log("image address => ",req.image.location )
+   console.log("image address => ", req.file.location);
 
    if (user) {
       const vendor = await FindVendor(user._id);
 
       if (vendor !== null) {
-         vendor.coverImages.push("image");
+         vendor.coverImages.push(req.file.location);
 
          const saveResult = await vendor.save();
 
