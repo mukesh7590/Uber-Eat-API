@@ -1,6 +1,7 @@
 // import { GetVendorByID } from "./AdminController";
 
 const Customer = require("../models/CustomerModel");
+const Food =require("../models/FoodModel")
 const { check, validationResult } = require("express-validator");
 const {
    GeneratePassword,
@@ -199,6 +200,98 @@ const EditCustomerProfile = async (req, res) => {
    return res.status(400).json({ msg: "Error while Updating Profile" });
 };
 
+/* ------------------- Cart Section --------------------- */
+const AddToCart = async (req, res) => {
+   // get the customer from request middleware funtion
+   const customer = req.user;
+   // check if customer is there
+   if (customer) {
+      // fetch the profile from Customer DB by customerID
+      const profile = await Customer.findById(customer._id);
+      // initialize the array for CartItems
+      let cartItems = Array();
+      // fetch the itemID and unit from req-Body
+      const { _id, unit } = req.body;
+
+      // FETCHING THE FOOD FROM DB BY ID
+      const food = await Food.findById(_id);
+
+      // CHECK FOR IF WE GET THE FOOD
+      if (food) {
+         // CHECK IF PROFILE EXSIST OR NOT
+         if (profile != null) {
+            // PUT THE PROFILE CART BUCKET INTO THE CARTITEMS
+            cartItems = profile.cart;
+            // CARTITEMS BUCKET IS EMPTY OF NOT
+            if (cartItems.length > 0) {
+               // CHECK THE CART
+               let existFoodItems = cartItems.filter(
+                  (item) => item.food._id.toString() === _id
+               );
+               if (existFoodItems.length > 0) {
+                  // fetch the index from cartItems
+                  const index = cartItems.indexOf(existFoodItems[0]);
+
+                  if (unit > 0) {
+                     // updating the cartIndex with new Unit
+                     cartItems[index] = { food, unit };
+                  } else {
+                     // removing the index from cartItems
+                     cartItems.splice(index, 1);
+                  }
+               } else {
+                  // item not in the cartItems bucket so push on it into the bucket
+                  cartItems.push({ food, unit });
+               }
+            } else {
+               // pushing the first item into the cart
+               cartItems.push({ food, unit });
+            }
+
+            if (cartItems) {
+               // updating the cart
+               profile.cart = cartItems;
+               // save the profile
+               const cartResult = await profile.save();
+               return res.status(200).json(cartResult.cart);
+            }
+         }
+      }
+   }
+
+   return res.status(404).json({ msg: "Unable to add to cart!" });
+};
+
+const GetCart = async (req, res) => {
+   const customer = req.user;
+
+   if (customer) {
+      const profile = await Customer.findById(customer._id);
+      if (profile) {
+         return res.status(200).json(profile.cart);
+      }
+   }
+   return res.status(400).json({ message: "Cart is Empty!" });
+};
+
+const DeleteCart = async (req, res) => {
+   const customer = req.user;
+
+   if (customer) {
+      const profile = await Customer.findById(customer._id)
+         .populate("cart.food")
+         .exec();
+
+      if (profile != null) {
+         profile.cart = [];
+         const cartResult = await profile.save();
+         return res.status(200).json(cartResult);
+      }
+   }
+
+   return res.status(400).json({ message: "cart is Already Empty!" });
+};
+
 module.exports = {
    CustomerSignUp,
    CustomerVerify,
@@ -206,4 +299,7 @@ module.exports = {
    RequestOtp,
    GetCustomerProfile,
    EditCustomerProfile,
+   AddToCart,
+   DeleteCart,
+   GetCart,
 };

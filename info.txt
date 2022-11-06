@@ -1,4 +1,0 @@
-users:
-    deepak@gmail.com   7836866926
-    maiky@gmail.com    7060545083
-    
