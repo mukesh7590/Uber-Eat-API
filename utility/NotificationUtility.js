@@ -8,7 +8,7 @@ const GenerateOtp = () => {
 
 const onRequestOTP = async (otp, toPhoneNumber) => {
    const accountSid = "AC05330bd82d89dfa4d9196a23aef353b4";
-   const authToken = "d0681203d488bd032106e5fe82fdc9c4";
+   const authToken = "47755883210476f4df1a2f3d7dae3a37";
    const client = require("twilio")(accountSid, authToken, {
       lazyLoading: true,
    });

@@ -6,6 +6,7 @@ const AdminRoute = require("./routes/AdminRoute");
 const VendorRoute = require("./routes/VendorRoute");
 const CustomerRoute = require("./routes/CustomerRoute");
 const ShoppingRoute = require("./routes/ShoppingRoute");
+const DeliveryRoute = require("./routes/DeliveryRoute");
 
 const cors = require("cors");
 const connectDB = require("./config/mongoose");
@@ -20,7 +21,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use("/admin", AdminRoute);
 app.use("/vendor", VendorRoute);
 app.use("/customer", CustomerRoute);
-// app.use("/delivery", DeliveryRoute);
+app.use("/delivery", DeliveryRoute);
 
 app.use(ShoppingRoute);
 

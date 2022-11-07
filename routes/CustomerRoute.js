@@ -18,7 +18,7 @@ const {
    CreatePayment,
 } = require("../controllers/CustomerController");
 
-/* ------------------- Suignup / Login Customer --------------------- */
+/* ------------------- Signup / Login Customer --------------------- */
 router.post(
    "/signup",
    [

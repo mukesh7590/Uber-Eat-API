@@ -9,7 +9,7 @@ const DeliveryUserSchema = new mongoose.Schema(
       lastName: { type: String },
       address: { type: String },
       phone: { type: String, required: true },
-      pincode: { type: String },
+      pincode: { type: String, required: true },
       verified: { type: Boolean },
       otp: { type: Number },
       otp_expiry: { type: Date },
