@@ -1,8 +1,8 @@
-// import { GetVendorByID } from "./AdminController";
-
 const Customer = require("../models/CustomerModel");
-const Food =require("../models/FoodModel")
-const { check, validationResult } = require("express-validator");
+const Food = require("../models/FoodModel");
+const Transaction = require("../models/TransactionModel");
+const Order = require("../models/OrderModel");
+const { validationResult } = require("express-validator");
 const {
    GeneratePassword,
    GenerateSalt,
@@ -139,7 +139,6 @@ const CustomerLogin = async (req, res) => {
    return res.json({ msg: "Error With Signup" });
 };
 
-// correct
 const RequestOtp = async (req, res) => {
    const customer = req.user;
 
@@ -292,6 +291,185 @@ const DeleteCart = async (req, res) => {
    return res.status(400).json({ message: "cart is Already Empty!" });
 };
 
+/* ------------------- Order Section --------------------- */
+
+const validateTransaction = async (txnId) => {
+   const currentTransaction = await Transaction.findById(txnId);
+   if (currentTransaction) {
+      if (currentTransaction.status.toLowerCase() !== "failed") {
+         return { status: true, currentTransaction };
+      }
+   }
+   return { status: false, currentTransaction };
+};
+
+const CreateOrder = async (req, res) => {
+   const customer = req.user;
+   const { items } = req.body;
+   // const { txnId, amount, items } = req.body;
+   // console.log("customer controller => ", customer);
+   if (customer) {
+      // create an order ID
+      // const { status, currentTransaction } = await validateTransaction(txnId);
+      // if (!status) {
+      //    return res
+      //       .status(404)
+      //       .json({ message: "Error while Creating Order!" });
+      // }
+
+      // making the order ID
+      const orderId = `${Math.floor(Math.random() * 89999) + 1000}`;
+      // get the user profile from Customer DB
+      const profile = await Customer.findById(customer._id);
+
+      let cartItems = Array();
+      let netAmount = 0.0;
+      let vendorId;
+
+      // calculate order amount
+      const foods = await Food.find()
+         .where("_id")
+         .in(items.map((item) => item.food))
+         .exec();
+      console.log("ye foods aaye hai => ", foods);
+
+      foods.map((foodItem) => {
+         items.map(({ food, unit }) => {
+            if (foodItem._id == food) {
+               vendorId = foodItem.vendorId;
+               netAmount += foodItem.price * unit;
+               cartItems.push({ foodItem, unit });
+            }
+         });
+      });
+
+      console.log("cartItems aaye hai => ", cartItems);
+
+      console.log("bill => ", netAmount);
+      // return res.status(201).json({
+      //    msg: "Order is creates Now. Please do the payment for confirm your order and it will be delivered in your place address",
+      // });
+      // create order with the Item description
+      if (cartItems) {
+         const currentOrder = await Order.create({
+            orderId: orderId,
+            vendorId: vendorId,
+            items: cartItems,
+            totalAmount: netAmount,
+            orderDate: new Date(),
+            paidAmount: 0,
+            orderStatus: "",
+            remarks: "",
+            deliveryId: "",
+            readyTime: 45,
+         });
+         profile.cart = [];
+         profile.orders.push(currentOrder);
+         const profileResponse = await profile.save();
+         return res.status(200).json(profileResponse);
+      }
+      // if (cartItems) {
+      //    const currentOrder = await Order.create({
+      //       orderId: orderId,
+      //       vendorId: vendorId,
+      //       items: cartItems,
+      //       totalAmount: netAmount,
+      //       orderDate: new Date(),
+      //       paidAmount: 0,
+      //       orderStatus: "Waiting",
+      //       remarks: "",
+      //       deliveryId: "",
+      //       readyTime: 45,
+      //    });
+
+      //    profile.cart = [];
+      //    profile.orders.push(currentOrder);
+
+      // payment me kenge isko
+      //    currentTransaction.vendorId = vendorId;
+      //    currentTransaction.orderId = orderId;
+      //    currentTransaction.status = "CONFIRMED";
+
+      //    await currentTransaction.save();
+      //    await assignOrderForDelivery(currentOrder._id, vendorId);
+
+      // }
+   }
+   return res.status(400).json({ msg: "Error while Creating Order" });
+};
+
+const GetOrders = async (req, res) => {
+   const customer = req.user;
+   // console.log("customer controller => ", customer);
+
+   if (customer) {
+      const profile = await Customer.findById(customer._id).populate("orders");
+      if (profile) {
+         return res.status(200).json(profile.orders);
+      }
+   }
+   return res.status(400).json({ msg: "Orders not found" });
+};
+
+const GetOrderById = async (req, res) => {
+   const orderId = req.params.id;
+   console.log("order id => ", orderId);
+   if (orderId) {
+      const order = await (
+         await Order.findOne({ orderId: orderId })
+      ).populate("items.food");
+      if (order) {
+         return res.status(200).json(order);
+      }
+   }
+   return res.status(400).json({ msg: "Order not found" });
+};
+
+const CreatePayment = async (req, res) => {
+   const customer = req.user;
+   // getting the amount, paymentMode, offerId
+   const { amount, paymentMode, offerId, orderId } = req.body;
+   let payableAmount = Number(amount);
+
+   let order = await Order.findOne({ orderId: orderId });
+
+   console.log("order aya hai => ", order);
+   if (offerId) {
+      const appliedOffer = await Offer.findById(offerId);
+
+      if (appliedOffer.isActive) {
+         payableAmount = payableAmount - appliedOffer.offerAmount;
+      }
+   }
+   // perform payment gateway charge api
+
+   // paymentMode : debit/credit, upi , COD
+   // paymentStatus : unpaid, Paid, Failed
+   
+
+   const transaction = await Transaction.create({
+      customer: customer._id,
+      vendorId: order.vendorId,
+      orderId: order.orderId,
+      payAmount: payableAmount,
+      offerUsed: offerId || "NA",
+      paymentStatus: "Unpaid",
+      paymentMode: "COD",
+      paymentResponse: "Payment is cash on Delivery",
+   });
+
+   if (transaction) {
+      order.paidAmount = payableAmount;
+      // order.orderStatus = "Accepted";
+      // order.deliverySatus = "Not Ready";
+      await order.save();
+   }
+   //return transaction
+   return res.status(200).json(transaction);
+   // return res.status(200).json({ msg: "testing the process" });
+};
+
+
 module.exports = {
    CustomerSignUp,
    CustomerVerify,
@@ -302,4 +480,8 @@ module.exports = {
    AddToCart,
    DeleteCart,
    GetCart,
+   CreateOrder,
+   GetOrders,
+   GetOrderById,
+   CreatePayment,
 };

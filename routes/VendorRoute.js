@@ -9,6 +9,9 @@ const {
    AddFood,
    GetFoods,
    UpdateVendorCoverImage,
+   GetOrders,
+   GetOrderDetails,
+   ProcessOrder,
 } = require("../controllers/VendorController");
 
 const { upload } = require("../AWS");
@@ -24,5 +27,10 @@ router.get("/foods", GetFoods);
 
 router.patch("/coverimage", upload.single("image"), UpdateVendorCoverImage);
 router.patch("/service", UpdateVendorService);
+
+// orders
+router.get("/orders", GetOrders);
+router.put("/order/:id/process", ProcessOrder);
+router.get("/order/:id", GetOrderDetails);
 
 module.exports = router;

@@ -7,6 +7,7 @@ const asyncHandler = require("express-async-handler");
 
 const { FindVendor } = require("./AdminController");
 const Food = require("../models/FoodModel");
+const Order = require("../models/OrderModel");
 
 // ================================== Vendor Profile Operations ==================================
 
@@ -142,12 +143,65 @@ const UpdateVendorService = async (req, res) => {
    return res.json({ message: "Vendor information is not found" });
 };
 
+// ****************** ORDER SECTION IS HERE ******************
+
+const GetOrders = async (req, res) => {
+   const user = req.user;
+   if (user) {
+      const orders = await Order.find({ vendorId: user._id }).populate(
+         "items.food"
+      );
+      if (orders != null) {
+         return res.status(200).json(orders);
+      }
+   }
+   return res.json({ message: "Orders Not found" });
+};
+
+const GetOrderDetails = async (req, res) => {
+   const orderId = req.params.id;
+   if (orderId) {
+      const order = await Order.findById(orderId).populate("items.food");
+      if (order != null) {
+         return res.status(200).json(order);
+      }
+   }
+   return res.json({ message: "Order Not found" });
+};
+
+const ProcessOrder = async (req, res) => {
+   const orderId = req.params.id;
+   // orderStatus : Accepted, Waiting, Prepared, Completed
+   // deliverySatus :Not Ready, Ready, Dipatched, On the Way, delivered
+
+   const { orderStatus, deliveryStatus, time } = req.body;
+
+   if (orderId) {
+      const order = await Order.findById(orderId).populate("items.food");
+      order.orderStatus = orderStatus;
+      order.deliverySatus = deliveryStatus;
+      if (time) {
+         order.readyTime = time;
+      }
+      const orderResult = await order.save();
+      if (orderResult != null) {
+         return res.status(200).json(orderResult);
+      }
+   }
+   return res.json({ message: "Unable to process order" });
+};
+
 module.exports = {
    VendorLogin,
    GetVendorProfile,
    UpdateVendorProfile,
    AddFood,
    GetFoods,
+
    UpdateVendorCoverImage,
    UpdateVendorService,
+
+   GetOrders,
+   GetOrderDetails,
+   ProcessOrder,
 };

@@ -1,4 +1,5 @@
 const Vendor = require("../models/VendorModel");
+const Transaction = require("../models/TransactionModel");
 const asyncHandler = require("express-async-handler");
 const {
    GeneratePassword,
@@ -80,9 +81,33 @@ const GetVendorByID = asyncHandler(async (req, res) => {
    return res.json({ message: "Vendors data is not available" });
 });
 
+const GetTransactions = async (req, res) => {
+   const transactions = await Transaction.find();
+
+   if (transactions) {
+      return res.status(200).json(transactions);
+   }
+
+   return res.json({ message: "Transactions data not available" });
+};
+
+const GetTransactionById = async (req, res) => {
+   const id = req.params.id;
+
+   const transaction = await Transaction.findById(id);
+
+   if (transaction) {
+      return res.status(200).json(transaction);
+   }
+
+   return res.json({ message: "Transaction data not available" });
+};
+
 module.exports = {
    FindVendor,
    CreateVendor,
    GetVendors,
    GetVendorByID,
+   GetTransactions,
+   GetTransactionById,
 };

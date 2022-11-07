@@ -18,7 +18,7 @@ const OrderSchema = new mongoose.Schema(
       paidAmount: { type: Number, require: true },
       orderDate: { type: Date },
       orderStatus: { type: String },
-      remarks: { type: String },
+      deliverySatus: { type: String },
       deliveryId: { type: String },
       readyTime: { type: Number },
    },

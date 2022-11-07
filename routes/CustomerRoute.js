@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { verifyToken } = require("../middleWares/CommonAuth");
-const { check, validationResult } = require("express-validator");
+const { check } = require("express-validator");
 const {
    CustomerSignUp,
    CustomerVerify,
@@ -12,6 +12,10 @@ const {
    AddToCart,
    DeleteCart,
    GetCart,
+   CreateOrder,
+   GetOrderById,
+   GetOrders,
+   CreatePayment,
 } = require("../controllers/CustomerController");
 
 /* ------------------- Suignup / Login Customer --------------------- */
@@ -52,30 +56,9 @@ router.post(
 
 /* ------------------- Authentication Need here below--------------------- */
 router.use(verifyToken);
-
 router.patch("/verify", CustomerVerify);
-
 router.get("/otp", RequestOtp);
-
 router.get("/profile", GetCustomerProfile);
-
-//Cart
-router.post("/cart", AddToCart);
-router.get("/cart", GetCart);
-router.delete("/cart", DeleteCart);
-
-//Order
-// router.post("/create-order", CreateOrder);
-// router.get("/orders", GetOrders);
-// router.get("/order/:id", GetOrderById);
-
-
-// //Apply Offers
-// router.get("/offer/verify/:id", VerifyOffer);
-
-// //Payment
-// router.post("/create-payment", CreatePayment);
-
 router.patch(
    "/profile",
    [
@@ -94,5 +77,21 @@ router.patch(
    ],
    EditCustomerProfile
 );
+
+//Cart Section
+router.post("/cart", AddToCart);
+router.get("/cart", GetCart);
+router.delete("/cart", DeleteCart);
+
+//Order Section
+router.post("/create-order", CreateOrder);
+router.get("/orders", GetOrders);
+router.get("/order/:id", GetOrderById);
+
+// //Apply Offers
+// router.get("/offer/verify/:id", VerifyOffer);
+
+// //Payment
+router.post("/create-payment", CreatePayment);
 
 module.exports = router;
