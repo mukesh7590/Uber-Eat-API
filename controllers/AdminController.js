@@ -1,5 +1,6 @@
 const Vendor = require("../models/VendorModel");
 const Transaction = require("../models/TransactionModel");
+const DeliveryUser = require("../models/DeliveryUserModel");
 const asyncHandler = require("express-async-handler");
 const {
    GeneratePassword,
@@ -103,6 +104,14 @@ const GetTransactionById = async (req, res) => {
    return res.json({ message: "Transaction data not available" });
 };
 
+const GetDeliveryUsers = async (req, res) => {
+   const deliveryUsers = await DeliveryUser.find();
+   if (deliveryUsers) {
+      return res.status(200).json(deliveryUsers);
+   }
+   return res.json({ message: "Unable to get Delivery Users" });
+};
+
 module.exports = {
    FindVendor,
    CreateVendor,
@@ -110,4 +119,5 @@ module.exports = {
    GetVendorByID,
    GetTransactions,
    GetTransactionById,
+   GetDeliveryUsers,
 };

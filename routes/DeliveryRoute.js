@@ -12,8 +12,6 @@ const {
    UpdateDeliveryUserStatus,
 } = require("../controllers/DeliveryController");
 
-// vendor create, gets all vendors, get vendor by ID
-
 /* ------------------- Signup / Create Customer --------------------- */
 router.post(
    "/signup",
@@ -37,7 +35,6 @@ router.post(
    ],
    DeliverySignUp
 );
-
 /* ------------------- Login --------------------- */
 router.post(
    "/login",
@@ -54,7 +51,6 @@ router.post(
    ],
    DeliveryLogin
 );
-
 /* ------------------- Authentication --------------------- */
 router.use(verifyToken);
 router.patch("/verify", DriverVerify);

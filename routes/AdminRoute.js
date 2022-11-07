@@ -6,6 +6,7 @@ const {
    GetVendorByID,
    GetTransactions,
    GetTransactionById,
+   GetDeliveryUsers,
 } = require("../controllers/AdminController");
 
 // vendor create, gets all vendors, get vendor by ID
@@ -17,4 +18,6 @@ router.get("/vendor/:id", GetVendorByID);
 router.get("/transactions", GetTransactions);
 router.get("/transaction/:id", GetTransactionById);
 
+// router.put('/delivery/verify', VerifyDeliveryUser)
+router.get("/delivery/users", GetDeliveryUsers);
 module.exports = router;
