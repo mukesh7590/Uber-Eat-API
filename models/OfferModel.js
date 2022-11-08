@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const OfferSchema = new mongoose.Schema(
    {
       offerType: { type: String, require: true },
-      vendors: [{ type: Schema.Types.ObjectId, ref: "Vendor" }],
+      vendor: [{ type: mongoose.Schema.Types.ObjectId, ref: "Vendor" }],
       title: { type: String, require: true },
       description: { type: String },
       minValue: { type: Number, require: true },

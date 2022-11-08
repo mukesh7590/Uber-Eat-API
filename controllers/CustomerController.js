@@ -2,14 +2,19 @@ const Customer = require("../models/CustomerModel");
 const Food = require("../models/FoodModel");
 const Transaction = require("../models/TransactionModel");
 const Order = require("../models/OrderModel");
+const Offer = require("../models/OfferModel");
 const { validationResult } = require("express-validator");
+
 const {
    GeneratePassword,
    GenerateSalt,
    GenerateSignature,
    ValidatePassword,
 } = require("../utility/PasswordUtility");
+
 const { GenerateOtp, onRequestOTP } = require("../utility/NotificationUtility");
+
+// ========================================== Customer Authentication Actions ==========================================
 
 const CustomerSignUp = async (req, res) => {
    const errors = validationResult(req);
@@ -199,7 +204,8 @@ const EditCustomerProfile = async (req, res) => {
    return res.status(400).json({ msg: "Error while Updating Profile" });
 };
 
-/* ------------------- Cart Section --------------------- */
+/* ========================================== Cart Section Actions here ========================================== */
+
 const AddToCart = async (req, res) => {
    // get the customer from request middleware funtion
    const customer = req.user;
@@ -291,7 +297,7 @@ const DeleteCart = async (req, res) => {
    return res.status(400).json({ message: "cart is Already Empty!" });
 };
 
-/* ------------------- Order Section --------------------- */
+/* ========================================== Order Section Actions here ========================================== */
 
 const validateTransaction = async (txnId) => {
    const currentTransaction = await Transaction.findById(txnId);
@@ -425,6 +431,8 @@ const GetOrderById = async (req, res) => {
    return res.status(400).json({ msg: "Order not found" });
 };
 
+/* ========================================== Payment and Offer verify Actions here ========================================== */
+
 const CreatePayment = async (req, res) => {
    const customer = req.user;
    // getting the amount, paymentMode, offerId
@@ -437,7 +445,7 @@ const CreatePayment = async (req, res) => {
    if (offerId) {
       const appliedOffer = await Offer.findById(offerId);
 
-      if (appliedOffer.isActive) {
+      if (appliedOffer.isActive && payableAmount >= appliedOffer.minValue) {
          payableAmount = payableAmount - appliedOffer.offerAmount;
       }
    }
@@ -445,7 +453,6 @@ const CreatePayment = async (req, res) => {
 
    // paymentMode : debit/credit, upi , COD
    // paymentStatus : unpaid, Paid, Failed
-   
 
    const transaction = await Transaction.create({
       customer: customer._id,
@@ -469,6 +476,23 @@ const CreatePayment = async (req, res) => {
    // return res.status(200).json({ msg: "testing the process" });
 };
 
+const VerifyOffer = async (req, res) => {
+   const offerId = req.params.id;
+   const customer = req.user;
+   if (customer) {
+      const appliedOffer = await Offer.findById(offerId);
+      if (appliedOffer) {
+         if (appliedOffer.isActive) {
+            return res
+               .status(200)
+               .json({ message: "Offer is Valid", offer: appliedOffer });
+         }
+      }
+   }
+   return res.status(400).json({ msg: "Offer is Not Valid" });
+};
+
+/* ========================================== Export all the Actions here ========================================== */
 
 module.exports = {
    CustomerSignUp,
@@ -484,4 +508,5 @@ module.exports = {
    GetOrders,
    GetOrderById,
    CreatePayment,
+   VerifyOffer,
 };

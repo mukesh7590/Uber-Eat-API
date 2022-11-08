@@ -16,6 +16,7 @@ const {
    GetOrderById,
    GetOrders,
    CreatePayment,
+   VerifyOffer,
 } = require("../controllers/CustomerController");
 
 /* ------------------- Signup / Login Customer --------------------- */
@@ -89,7 +90,7 @@ router.get("/orders", GetOrders);
 router.get("/order/:id", GetOrderById);
 
 // //Apply Offers
-// router.get("/offer/verify/:id", VerifyOffer);
+router.get("/offer/verify/:id", VerifyOffer);
 
 // //Payment
 router.post("/create-payment", CreatePayment);

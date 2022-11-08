@@ -1,5 +1,6 @@
 const Customer = require("../models/CustomerModel");
 const Vendor = require("../models/VendorModel");
+const Offer = require("../models/OfferModel");
 
 // available resturants list who can deliverd the food
 const GetFoodAvailability = async (req, res) => {
@@ -85,26 +86,20 @@ const RestaurantById = async (req, res) => {
    return res.status(404).json({ msg: "data Not found!" });
 };
 
+const GetAvailableOffers = async (req, res) => {
+   const pincode = req.params.pincode;
+   const offers = await Offer.find({ pincode: pincode, isActive: true });
+   if (offers) {
+      return res.status(200).json(offers);
+   }
+   return res.json({ message: "Offers not Found!" });
+};
+
 module.exports = {
    GetFoodAvailability,
    GetTopRestaurants,
    GetFoodsIn30Min,
    SearchFoods,
    RestaurantById,
+   GetAvailableOffers,
 };
-
-// export const GetAvailableOffers = async (
-//    req: Request,
-//    res: Response,
-//    next: NextFunction
-// ) => {
-//    const pincode = req.params.pincode;
-
-//    const offers = await Offer.find({ pincode: pincode, isActive: true });
-
-//    if (offers) {
-//       return res.status(200).json(offers);
-//    }
-
-//    return res.json({ message: "Offers not Found!" });
-// };
