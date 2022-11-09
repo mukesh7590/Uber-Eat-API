@@ -1,353 +1,104 @@
-# Uber-Eat-API
+# Uber-Eat-REST-API
 online food ordering API where all the three entity (Vendor,Customer,Driver) will communicate with each other.
-# REST API example application
 
-This is a bare-bones example of a Sinatra application providing a REST
-API to a DataMapper-backed model.
-
-The entire application is contained within the `app.rb` file.
-
-`config.ru` is a minimal Rack configuration for unicorn.
-
-`run-tests.sh` runs a simplistic test and generates the API
-documentation below.
-
-It uses `run-curl-tests.rb` which runs each command defined in
-`commands.yml`.
-
-## Install
-
-    bundle install
-
-## Run the app
-
-    unicorn -p 7000
-
-## Run the tests
-
-    ./run-tests.sh
-
-# REST API
-
-The REST API to the example app is described below.
-
-## Get list of Things
-
-### Request
-
-`GET /thing/`
-
-    curl -i -H 'Accept: application/json' http://localhost:7000/thing/
-
-### Response
-
-    HTTP/1.1 200 OK
-    Date: Thu, 24 Feb 2011 12:36:30 GMT
-    Status: 200 OK
-    Connection: close
-    Content-Type: application/json
-    Content-Length: 2
-
-    []
-
-## Create a new Thing
-
-### Request
-
-`POST /thing/`
-
-    curl -i -H 'Accept: application/json' -d 'name=Foo&status=new' http://localhost:7000/thing
-
-### Response
-
-    HTTP/1.1 201 Created
-    Date: Thu, 24 Feb 2011 12:36:30 GMT
-    Status: 201 Created
-    Connection: close
-    Content-Type: application/json
-    Location: /thing/1
-    Content-Length: 36
-
-    {"id":1,"name":"Foo","status":"new"}
-
-## Get a specific Thing
-
-### Request
-
-`GET /thing/id`
-
-    curl -i -H 'Accept: application/json' http://localhost:7000/thing/1
-
-### Response
-
-    HTTP/1.1 200 OK
-    Date: Thu, 24 Feb 2011 12:36:30 GMT
-    Status: 200 OK
-    Connection: close
-    Content-Type: application/json
-    Content-Length: 36
-
-    {"id":1,"name":"Foo","status":"new"}
-
-## Get a non-existent Thing
-
-### Request
-
-`GET /thing/id`
-
-    curl -i -H 'Accept: application/json' http://localhost:7000/thing/9999
-
-### Response
-
-    HTTP/1.1 404 Not Found
-    Date: Thu, 24 Feb 2011 12:36:30 GMT
-    Status: 404 Not Found
-    Connection: close
-    Content-Type: application/json
-    Content-Length: 35
-
-    {"status":404,"reason":"Not found"}
-
-## Create another new Thing
-
-### Request
-
-`POST /thing/`
-
-    curl -i -H 'Accept: application/json' -d 'name=Bar&junk=rubbish' http://localhost:7000/thing
-
-### Response
-
-    HTTP/1.1 201 Created
-    Date: Thu, 24 Feb 2011 12:36:31 GMT
-    Status: 201 Created
-    Connection: close
-    Content-Type: application/json
-    Location: /thing/2
-    Content-Length: 35
-
-    {"id":2,"name":"Bar","status":null}
-
-## Get list of Things again
-
-### Request
-
-`GET /thing/`
-
-    curl -i -H 'Accept: application/json' http://localhost:7000/thing/
-
-### Response
-
-    HTTP/1.1 200 OK
-    Date: Thu, 24 Feb 2011 12:36:31 GMT
-    Status: 200 OK
-    Connection: close
-    Content-Type: application/json
-    Content-Length: 74
-
-    [{"id":1,"name":"Foo","status":"new"},{"id":2,"name":"Bar","status":null}]
-
-## Change a Thing's state
-
-### Request
-
-`PUT /thing/:id/status/changed`
-
-    curl -i -H 'Accept: application/json' -X PUT http://localhost:7000/thing/1/status/changed
-
-### Response
-
-    HTTP/1.1 200 OK
-    Date: Thu, 24 Feb 2011 12:36:31 GMT
-    Status: 200 OK
-    Connection: close
-    Content-Type: application/json
-    Content-Length: 40
-
-    {"id":1,"name":"Foo","status":"changed"}
-
-## Get changed Thing
-
-### Request
-
-`GET /thing/id`
-
-    curl -i -H 'Accept: application/json' http://localhost:7000/thing/1
-
-### Response
-
-    HTTP/1.1 200 OK
-    Date: Thu, 24 Feb 2011 12:36:31 GMT
-    Status: 200 OK
-    Connection: close
-    Content-Type: application/json
-    Content-Length: 40
-
-    {"id":1,"name":"Foo","status":"changed"}
-
-## Change a Thing
-
-### Request
-
-`PUT /thing/:id`
-
-    curl -i -H 'Accept: application/json' -X PUT -d 'name=Foo&status=changed2' http://localhost:7000/thing/1
-
-### Response
-
-    HTTP/1.1 200 OK
-    Date: Thu, 24 Feb 2011 12:36:31 GMT
-    Status: 200 OK
-    Connection: close
-    Content-Type: application/json
-    Content-Length: 41
-
-    {"id":1,"name":"Foo","status":"changed2"}
-
-## Attempt to change a Thing using partial params
-
-### Request
-
-`PUT /thing/:id`
-
-    curl -i -H 'Accept: application/json' -X PUT -d 'status=changed3' http://localhost:7000/thing/1
-
-### Response
-
-    HTTP/1.1 200 OK
-    Date: Thu, 24 Feb 2011 12:36:32 GMT
-    Status: 200 OK
-    Connection: close
-    Content-Type: application/json
-    Content-Length: 41
-
-    {"id":1,"name":"Foo","status":"changed3"}
-
-## Attempt to change a Thing using invalid params
-
-### Request
-
-`PUT /thing/:id`
-
-    curl -i -H 'Accept: application/json' -X PUT -d 'id=99&status=changed4' http://localhost:7000/thing/1
-
-### Response
-
-    HTTP/1.1 200 OK
-    Date: Thu, 24 Feb 2011 12:36:32 GMT
-    Status: 200 OK
-    Connection: close
-    Content-Type: application/json
-    Content-Length: 41
-
-    {"id":1,"name":"Foo","status":"changed4"}
-
-## Change a Thing using the _method hack
-
-### Request
-
-`POST /thing/:id?_method=POST`
-
-    curl -i -H 'Accept: application/json' -X POST -d 'name=Baz&_method=PUT' http://localhost:7000/thing/1
-
-### Response
-
-    HTTP/1.1 200 OK
-    Date: Thu, 24 Feb 2011 12:36:32 GMT
-    Status: 200 OK
-    Connection: close
-    Content-Type: application/json
-    Content-Length: 41
-
-    {"id":1,"name":"Baz","status":"changed4"}
-
-## Change a Thing using the _method hack in the url
-
-### Request
-
-`POST /thing/:id?_method=POST`
-
-    curl -i -H 'Accept: application/json' -X POST -d 'name=Qux' http://localhost:7000/thing/1?_method=PUT
-
-### Response
-
-    HTTP/1.1 404 Not Found
-    Date: Thu, 24 Feb 2011 12:36:32 GMT
-    Status: 404 Not Found
-    Connection: close
-    Content-Type: text/html;charset=utf-8
-    Content-Length: 35
-
-    {"status":404,"reason":"Not found"}
-
-## Delete a Thing
-
-### Request
-
-`DELETE /thing/id`
-
-    curl -i -H 'Accept: application/json' -X DELETE http://localhost:7000/thing/1/
-
-### Response
-
-    HTTP/1.1 204 No Content
-    Date: Thu, 24 Feb 2011 12:36:32 GMT
-    Status: 204 No Content
-    Connection: close
-
-
-## Try to delete same Thing again
-
-### Request
-
-`DELETE /thing/id`
-
-    curl -i -H 'Accept: application/json' -X DELETE http://localhost:7000/thing/1/
-
-### Response
-
-    HTTP/1.1 404 Not Found
-    Date: Thu, 24 Feb 2011 12:36:32 GMT
-    Status: 404 Not Found
-    Connection: close
-    Content-Type: application/json
-    Content-Length: 35
-
-    {"status":404,"reason":"Not found"}
-
-## Get deleted Thing
-
-### Request
-
-`GET /thing/1`
-
-    curl -i -H 'Accept: application/json' http://localhost:7000/thing/1
-
-### Response
-
-    HTTP/1.1 404 Not Found
-    Date: Thu, 24 Feb 2011 12:36:33 GMT
-    Status: 404 Not Found
-    Connection: close
-    Content-Type: application/json
-    Content-Length: 35
-
-    {"status":404,"reason":"Not found"}
-
-## Delete a Thing using the _method hack
-
-### Request
-
-`DELETE /thing/id`
-
-    curl -i -H 'Accept: application/json' -X POST -d'_method=DELETE' http://localhost:7000/thing/2/
-
-### Response
-
-    HTTP/1.1 204 No Content
-    Date: Thu, 24 Feb 2011 12:36:33 GMT
-    Status: 204 No Content
-    Connection: close
-
-
-
+## Built With
+Here is the Technology Stack of this Application. which I have used to Built this Application.
+
+-  MongoDB
+-  AWS-S3
+-  Express
+-  NodeJS
+
+<!-- GETTING STARTED -->
+
+## Getting Started
+
+-  Clone this project
+-  Start by installing npm and mongoDB if you don't have them already.
+-  Run the Mongo Server.
+
+## API Routes
+ - In this API, I have created some routes for each users like vendor, customer, driver. Some request routes needed the JWT web token for authorization, checked for the user is valid or not. I have declared all the routes given below. 
+
+## Admin Route
+
+| Request                |                   Route-URL                   | Request-Type | JWT-Token |
+| ---------------------- | :-------------------------------------------: | :--: | :---: |
+| Create Vendor          |      http://localhost:8000/admin/vendor       | Post |  No   |
+| View all Vendors        |      http://localhost:8000/admin/vendors      | Get  |  No   |
+| View Vendor by ID       |   http://localhost:8000/admin/vendor/:{id}    | Get  |  No   |
+| View all Transactions   |   http://localhost:8000/admin/transactions    | Get  |  No   |
+| Transaction by ID      | http://localhost:8000/admin/transaction/:{id} | Get  |  No   |
+| View all Delivery Users |  http://localhost:8000/admin/delivery/users   | Get  |  No   |
+
+## Vendor Route
+
+| Request               |                    Route-URL                     | Request-Type  | JWT-Token |
+| --------------------- | :----------------------------------------------: | :---: | :---: |
+| Vendor Login          |        http://localhost:8000/vendor/login        | Post  |  No   |
+| Vendor Profile        |       http://localhost:8000/vendor/profile       |  Get  |  Yes  |
+| Vendor Update Profile |       http://localhost:8000/vendor/profile       | Patch |  Yes  |
+| Add Food              |        http://localhost:8000/vendor/food         | Post  |  Yes  |
+| View all Foods              |        http://localhost:8000/vendor/foods        |  Get  |  Yes  |
+| Update Cover Image    |     http://localhost:8000/vendor/coverimage      | Patch |  Yes  |
+| Update Service        |       http://localhost:8000/vendor/service       | Patch |  Yes  |
+| View all Orders        |       http://localhost:8000/vendor/orders        |  Get  |  Yes  |
+| Order Process         | http://localhost:8000/vendor/order/:{id}/process |  Put  |  Yes  |
+| Order by ID           |     http://localhost:8000/vendor/order/:{id}     |  Get  |  Yes  |
+| Add Offer             |       http://localhost:8000/vendor/offers        | Post  |  Yes  |
+| Get Offers            |        http://localhost:8000/vendor/offer        |  Get  |  Yes  |
+| Edit Offer            |     http://localhost:8000/vendor/offer/:{id}     |  Put  |  Yes  |
+
+## Shopping Route
+
+| Request             |                    Route-URL                     | Request-Type | JWT-Token |
+| ------------------- | :----------------------------------------------: | :--: | :---: |
+| Foods Availablility |         http://localhost:8000/:{pincode}         | Get  |  Yes  |
+| Top Restaurants     | http://localhost:8000/top-restaurant/:{pincode}  | Get  |  Yes  |
+| Food in 30 minutes  | http://localhost:8000/foods-in-30-min/:{pincode} | Get  |  Yes  |
+| Foods Search        |     http://localhost:8000/search/:{pincode}      | Get  |  Yes  |
+| Restaurant by ID    |      http://localhost:8000/restaurant/:{id}      | Get  |  Yes  |
+| Available Offer     |     http://localhost:8000/offers/:{pincode}      | Get  |  Yes  |
+
+## Customer Route
+
+| Request        |                     Route-URL                     |  Request-Type  | JWT-Token |
+| -------------- | :-----------------------------------------------: | :----: | :---: |
+| Sign Up        |       http://localhost:8000/customer/signup       |  Post  |  No   |
+| Verify OTP     |       http://localhost:8000/customer/verify       | Patch  |  Yes  |
+| Login          |       http://localhost:8000/customer/login        |  Post  |  No   |
+| Request OTP    |        http://localhost:8000/customer/otp         |  Get   |  Yes  |
+| View Profile    |      http://localhost:8000/customer/profile       |  Get   |  Yes  |
+| Edit Profile   |      http://localhost:8000/customer/profile       | Patch  |  Yes  |
+| Create Payment |   http://localhost:8000/customer/create-payment   |  Post  |  Yes  |
+| Verify Offer   | http://localhost:8000/customer/offer/verify/:{id} |  Get   |  Yes  |
+| Create Order   |    http://localhost:8000/customer/create-order    |  Post  |  Yes  |
+| View Order     |       http://localhost:8000/customer/orders       |  Get   |  Yes  |
+| Order by ID    |    http://localhost:8000/customer/order/:{id}     |  Get   |  Yes  |
+| Add to Cart    |        http://localhost:8000/customer/cart        |  Post  |  Yes  |
+| View Cart      |        http://localhost:8000/customer/cart        |  Get   |  Yes  |
+| Delete Cart    |        http://localhost:8000/customer/cart        | Delete |  Yes  |
+
+## Delivery Route
+
+| Request       |                  Route-URL                   | Request-Type  | JWT-Token |
+| ------------- | :------------------------------------------: | :---: | :---: |
+| Sign Up       |    http://localhost:8000/delivery/signup     | Post  |  No   |
+| Login         |     http://localhost:8000/delivery/login     | Post  |  No   |
+| Verify Driver |    http://localhost:8000/delivery/verify     | Patch |  Yes  |
+| Request OTP   |      http://localhost:8000/delivery/otp      |  Get  |  Yes  |
+| View Profile   |    http://localhost:8000/delivery/profile    |  Get  |  Yes  |
+| Edit Profile  |    http://localhost:8000/delivery/profile    | Patch |  Yes  |
+| Change Status | http://localhost:8000/delivery/change-status |  Put  |  Yes  |
+
+<!-- CONTRIBUTING -->
+## Contributing
+
+If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
+Don't forget to give the project a star! Thanks again!
+
+1. Fork the Project
+2. Create your Feature Branch 
+3. Commit your Changes 
+4. Push to the Branch 
+5. Open a Pull Request
