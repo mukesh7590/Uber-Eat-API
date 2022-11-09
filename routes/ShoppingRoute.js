@@ -6,6 +6,7 @@ const {
    GetFoodsIn30Min,
    SearchFoods,
    RestaurantById,
+   GetAvailableOffers
 } = require("../controllers/ShoppingController");
 
 /* ------------------- Food Availability --------------------- */
@@ -24,6 +25,6 @@ router.get("/search/:pincode", SearchFoods);
 router.get("/restaurant/:id", RestaurantById);
 
 /* ------------------- Search Offers --------------------- */
-// router.get("/offers/:pincode", GetAvailableOffers);
+router.get("/offers/:pincode", GetAvailableOffers);
 
 module.exports = router;
